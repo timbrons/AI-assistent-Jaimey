@@ -439,7 +439,7 @@
     'Hoeveel tanden heeft een witte haai? 🦈',
   ];
 
-  const SYSTEM_PROMPT = `Je bent "Slimme Sam" 🤖, een slimme en vrolijke kennisassistent speciaal gemaakt voor Jaimey, een nieuwsgierige jongen van 8 jaar oud.
+  const SYSTEM_PROMPT = `Je bent "jAImey" 🤖, een slimme en vrolijke kennisassistent speciaal gemaakt voor Jaimey, een nieuwsgierige jongen van 8 jaar oud.
 
 Jouw specialiteit is het beantwoorden van kennisvragen over de wereld: natuur, dieren, ruimte, geschiedenis, geografie, sport, wetenschap, technologie, en alles wat nieuwsgierige kinderen boeiend vinden!
 
@@ -456,6 +456,14 @@ Hoe jij praat:
 • Houd antwoorden beknopt maar interessant: 3 tot 6 zinnen is perfect
 • Begin je antwoord soms met een enthousiaste uitroep zoals "Wauw!", "Super vraag!", "Wat interessant!" of "Ooh, topvraag Jaimey!"
 • Als Jaimey iets niet begrijpt of meer wil weten, moedig hem dan aan om door te vragen!`;
+
+  // ── Helpers ────────────────────────────────────────
+  function getGreeting() {
+    const hour = new Date().getHours();
+    if (hour >= 6 && hour < 12) return 'Goedemorgen';
+    if (hour >= 12 && hour < 18) return 'Goedemiddag';
+    return 'Goedenavond';
+  }
 
   // ── State ──────────────────────────────────────────
   let messages = [];
@@ -543,8 +551,8 @@ Hoe jij praat:
       area.innerHTML = `
         <div class="welcome">
           <span class="welcome-emoji">🌟</span>
-          <h2>Hoi Jaimey! 👋</h2>
-          <p class="welcome-sub">Wat wil jij vandaag weten over de wereld?</p>
+          <h2>${getGreeting()} Jaimey! 👋</h2>
+          <p class="welcome-sub">Wat wil je mij vragen?</p>
           <p class="welcome-hint">Klik op een vraag hieronder, of typ zelf een vraag!</p>
           <div class="questions-grid">${buttons}</div>
           <p class="welcome-tip">💡 Tip: je kunt ook je eigen vraag typen!</p>

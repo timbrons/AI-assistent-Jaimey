@@ -1,7 +1,16 @@
+'use client';
+
 type Props = {
   questions: string[];
   onSelect: (question: string) => void;
 };
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour >= 6 && hour < 12) return 'Goedemorgen';
+  if (hour >= 12 && hour < 18) return 'Goedemiddag';
+  return 'Goedenavond';
+}
 
 export default function SuggestedQuestions({ questions, onSelect }: Props) {
   return (
@@ -12,10 +21,10 @@ export default function SuggestedQuestions({ questions, onSelect }: Props) {
           🌟
         </div>
         <h2 className="text-2xl font-extrabold text-purple-700 mb-2">
-          Hoi Jaimey! 👋
+          {getGreeting()} Jaimey! 👋
         </h2>
         <p className="text-gray-600 text-lg font-semibold">
-          Wat wil jij vandaag weten over de wereld?
+          Wat wil je mij vragen?
         </p>
         <p className="text-gray-400 text-sm mt-1">
           Klik op een vraag hieronder, of typ zelf een vraag!
