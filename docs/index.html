@@ -258,20 +258,36 @@
     .dot:nth-child(2) { animation-delay: 0.18s; }
     .dot:nth-child(3) { animation-delay: 0.36s; }
 
-    /* Welcome screen */
-    .welcome {
+    /* Greeting area (boven invoerveld, alleen als leeg) */
+    #greeting-area {
+      flex-shrink: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 16px;
+      padding: 28px 16px 20px;
+      text-align: center;
       background: linear-gradient(180deg, #eff6ff, #f5f3ff);
-      min-height: 100%;
     }
 
     .welcome-emoji { font-size: 4rem; margin-bottom: 12px; animation: bounce 2s infinite; display: block; }
-    .welcome h2 { font-size: 1.5rem; font-weight: 900; color: #6d28d9; margin-bottom: 8px; }
-    .welcome-sub { font-size: 1.05rem; font-weight: 600; color: #4b5563; margin-bottom: 4px; }
-    .welcome-hint { font-size: 0.85rem; color: #9ca3af; margin-bottom: 28px; }
+    #greeting-area h2 { font-size: 1.5rem; font-weight: 900; color: #6d28d9; margin-bottom: 6px; }
+    .greeting-sub { font-size: 0.9rem; font-weight: 600; color: #6b7280; }
+
+    /* Questions area (onder invoerveld, alleen als leeg) */
+    #questions-area {
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #d8b4fe transparent;
+      background: linear-gradient(180deg, #f5f3ff, #fdf2f8);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #questions-area::-webkit-scrollbar { width: 4px; }
+    #questions-area::-webkit-scrollbar-thumb { background: #d8b4fe; border-radius: 2px; }
 
     .questions-grid {
       display: grid;
@@ -301,7 +317,7 @@
     .q-btn:hover { background: #f5f3ff; border-color: #a78bfa; transform: scale(1.03); }
     .q-btn:active { transform: scale(0.97); }
 
-    .welcome-tip { margin-top: 28px; font-size: 0.75rem; color: #9ca3af; }
+    .welcome-tip { margin-top: 16px; font-size: 0.75rem; color: #9ca3af; }
 
     /* Input area */
     .input-area {
@@ -410,8 +426,17 @@
     </div>
   </header>
 
+  <!-- Begroeting (alleen zichtbaar als leeg) -->
+  <div id="greeting-area" style="display:none">
+    <span class="welcome-emoji">🌟</span>
+    <h2 id="greeting-text"></h2>
+    <p class="greeting-sub">Typ hieronder je vraag of kies één van de onderstaande vragen</p>
+  </div>
+
+  <!-- Berichten (alleen zichtbaar als niet leeg) -->
   <div class="messages-area" id="messages-area"></div>
 
+  <!-- Invoerveld (altijd zichtbaar) -->
   <div class="input-area">
     <div class="input-row">
       <textarea
@@ -424,6 +449,12 @@
       <button class="send-btn" id="send-btn" disabled title="Verstuur (Enter)">🚀</button>
     </div>
     <p class="input-hint">Druk op Enter om te versturen &bull; Shift+Enter voor een nieuwe regel</p>
+  </div>
+
+  <!-- Voorgestelde vragen (alleen zichtbaar als leeg) -->
+  <div id="questions-area" style="display:none">
+    <div class="questions-grid" id="questions-grid"></div>
+    <p class="welcome-tip">💡 Tip: je kunt ook je eigen vraag typen!</p>
   </div>
 </div>
 
@@ -530,6 +561,25 @@ Hoe jij praat:
     document.getElementById('input-box').focus();
   }
 
+  function setEmptyLayout(empty) {
+    const greetingArea   = document.getElementById('greeting-area');
+    const messagesArea   = document.getElementById('messages-area');
+    const questionsArea  = document.getElementById('questions-area');
+
+    greetingArea.style.display  = empty ? 'flex'  : 'none';
+    messagesArea.style.flex     = empty ? 'none'  : '1';
+    messagesArea.style.display  = empty ? 'none'  : 'block';
+    questionsArea.style.display = empty ? 'flex'  : 'none';
+
+    if (empty) {
+      document.getElementById('greeting-text').textContent = getGreeting() + ' Jaimey! 👋';
+      const grid = document.getElementById('questions-grid');
+      grid.innerHTML = SUGGESTED_QUESTIONS
+        .map(q => `<button class="q-btn" onclick="sendMessage(${JSON.stringify(q)})">${escapeHtml(q)}</button>`)
+        .join('');
+    }
+  }
+
   // ── Rendering ──────────────────────────────────────
   function escapeHtml(str) {
     return str
@@ -543,22 +593,8 @@ Hoe jij praat:
     const area = document.getElementById('messages-area');
     const isEmpty = messages.length === 0 && !isLoading && !streamingText;
 
-    if (isEmpty) {
-      const buttons = SUGGESTED_QUESTIONS
-        .map(q => `<button class="q-btn" onclick="sendMessage(${JSON.stringify(q)})">${escapeHtml(q)}</button>`)
-        .join('');
-
-      area.innerHTML = `
-        <div class="welcome">
-          <span class="welcome-emoji">🌟</span>
-          <h2>${getGreeting()} Jaimey! 👋</h2>
-          <p class="welcome-sub">Wat wil je mij vragen?</p>
-          <p class="welcome-hint">Klik op een vraag hieronder, of typ zelf een vraag!</p>
-          <div class="questions-grid">${buttons}</div>
-          <p class="welcome-tip">💡 Tip: je kunt ook je eigen vraag typen!</p>
-        </div>`;
-      return;
-    }
+    setEmptyLayout(isEmpty);
+    if (isEmpty) return;
 
     let html = '<div class="messages-list">';
 
