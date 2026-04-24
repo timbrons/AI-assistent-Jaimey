@@ -199,10 +199,10 @@ export default function ChatInterface() {
             <span className="text-3xl select-none" aria-hidden="true">🌍</span>
             <div>
               <h1 className="text-xl font-extrabold text-white tracking-tight leading-tight">
-                Jaimey&rsquo;s Slimme Assistent
+                Hoi! Ik ben jAImey 👋
               </h1>
               <p className="text-teal-100 text-xs font-semibold">
-                Ontdek de wereld! 🗺️
+                Jouw slimme wereld-assistent 🌍
               </p>
             </div>
           </div>
