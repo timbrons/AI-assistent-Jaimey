@@ -367,6 +367,33 @@
     .send-btn:active:not(:disabled) { transform: scale(0.95); }
     .send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
+    .mic-btn {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      background: #f0fdfa;
+      border: 2px solid #99f6e4;
+      border-radius: 14px;
+      font-size: 1.25rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .mic-btn:hover:not(:disabled) { background: #ccfbf1; transform: scale(1.05); }
+    .mic-btn:active:not(:disabled) { transform: scale(0.95); }
+    .mic-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .mic-btn.listening {
+      background: #fee2e2;
+      border-color: #fca5a5;
+      animation: pulseMic 1s ease-in-out infinite;
+      cursor: not-allowed;
+    }
+
+    @keyframes pulseMic {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.93); opacity: 0.7; }
+    }
+
     .input-hint { text-align: center; font-size: 0.75rem; color: #9ca3af; margin-top: 6px; user-select: none; }
 
     /* ── Animations ───────────────────────────────── */
@@ -446,6 +473,7 @@
         rows="1"
         aria-label="Stel een vraag"
       ></textarea>
+      <button class="mic-btn" id="mic-btn" onclick="startVoiceInput()" title="Spreek je vraag in" aria-label="Spreek je vraag in">🎤</button>
       <button class="send-btn" id="send-btn" disabled title="Verstuur (Enter)">🌍</button>
     </div>
     <p class="input-hint">Druk op Enter om te versturen &bull; Shift+Enter voor een nieuwe regel</p>
@@ -630,6 +658,53 @@ Hoe jij praat:
     html += '<div id="bottom-anchor"></div></div>';
     area.innerHTML = html;
     document.getElementById('bottom-anchor')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // ── Voice Input ────────────────────────────────────
+  function startVoiceInput() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      alert('Spraakherkenning werkt niet in deze browser. Probeer Chrome of Edge.');
+      return;
+    }
+
+    const micBtn   = document.getElementById('mic-btn');
+    const inputBox = document.getElementById('input-box');
+    const sendBtn  = document.getElementById('send-btn');
+
+    const recognition = new SR();
+    recognition.lang = 'nl-NL';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    micBtn.classList.add('listening');
+    micBtn.disabled = true;
+    inputBox.disabled = true;
+    sendBtn.disabled = true;
+
+    recognition.start();
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      inputBox.value = transcript;
+      inputBox.style.height = 'auto';
+      inputBox.style.height = Math.min(inputBox.scrollHeight, 128) + 'px';
+    };
+
+    recognition.onend = () => {
+      micBtn.classList.remove('listening');
+      micBtn.disabled = false;
+      inputBox.disabled = false;
+      sendBtn.disabled = !inputBox.value.trim();
+      inputBox.focus();
+    };
+
+    recognition.onerror = () => {
+      micBtn.classList.remove('listening');
+      micBtn.disabled = false;
+      inputBox.disabled = false;
+      sendBtn.disabled = !inputBox.value.trim();
+    };
   }
 
   // ── Send Message ───────────────────────────────────

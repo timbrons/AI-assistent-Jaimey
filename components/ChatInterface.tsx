@@ -31,6 +31,7 @@ export default function ChatInterface() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [streamingText, setStreamingText] = useState('');
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -105,6 +106,35 @@ export default function ChatInterface() {
     [messages, isLoading]
   );
 
+  const startVoiceInput = useCallback(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) {
+      alert('Spraakherkenning werkt niet in deze browser. Probeer Chrome of Edge.');
+      return;
+    }
+    const recognition = new SR();
+    recognition.lang = 'nl-NL';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    setIsListening(true);
+    recognition.start();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (event: any) => {
+      const transcript: string = event.results[0][0].transcript;
+      setInput(transcript);
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height =
+          Math.min(textareaRef.current.scrollHeight, 128) + 'px';
+      }
+    };
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+  }, []);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -129,14 +159,27 @@ export default function ChatInterface() {
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           placeholder="Typ hier je vraag... 🌍"
-          disabled={isLoading}
+          disabled={isLoading || isListening}
           rows={1}
           className="flex-1 resize-none rounded-2xl border-2 border-teal-200 focus:border-teal-500 focus:outline-none px-4 py-3 text-base leading-snug transition-colors disabled:opacity-60 min-h-[48px] max-h-32 overflow-y-auto"
           aria-label="Stel een vraag"
         />
         <button
+          onClick={startVoiceInput}
+          disabled={isLoading || isListening}
+          className={`h-12 w-12 flex-shrink-0 rounded-2xl flex items-center justify-center text-xl transition-all flex-shrink-0 ${
+            isListening
+              ? 'bg-red-100 border-2 border-red-300 animate-pulse cursor-not-allowed'
+              : 'bg-teal-50 border-2 border-teal-200 hover:bg-teal-100 hover:scale-105 active:scale-95'
+          }`}
+          aria-label="Spreek je vraag in"
+          title="Spreek je vraag in"
+        >
+          🎤
+        </button>
+        <button
           onClick={() => sendMessage(input)}
-          disabled={isLoading || !input.trim()}
+          disabled={isLoading || isListening || !input.trim()}
           className="h-12 w-12 flex-shrink-0 bg-gradient-to-br from-teal-500 to-blue-600 text-white rounded-2xl flex items-center justify-center text-xl font-bold shadow hover:scale-105 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
           aria-label="Verstuur vraag"
           title="Verstuur (Enter)"
