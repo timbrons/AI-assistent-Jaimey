@@ -110,7 +110,7 @@ export default function ChatInterface() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) {
-      alert('Spraakherkenning werkt niet in deze browser. Probeer Chrome of Edge.');
+      alert('Spraakherkenning werkt niet in deze browser. Probeer Chrome of Safari.');
       return;
     }
     const recognition = new SR();
@@ -118,9 +118,7 @@ export default function ChatInterface() {
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
-    setIsListening(true);
-    recognition.start();
-
+    // Handlers instellen VOOR start() — Safari vereist dit
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onresult = (event: any) => {
       const transcript: string = event.results[0][0].transcript;
@@ -132,7 +130,19 @@ export default function ChatInterface() {
       }
     };
     recognition.onend = () => setIsListening(false);
-    recognition.onerror = () => setIsListening(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onerror = (event: any) => {
+      setIsListening(false);
+      if (event.error === 'not-allowed') {
+        alert('Microfoon toegang geweigerd. Controleer je browserinstellingen.');
+      } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        alert('Spraakherkenning mislukt (' + event.error + '). Probeer opnieuw.');
+      }
+    };
+
+    // Nu pas starten
+    setIsListening(true);
+    recognition.start();
   }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

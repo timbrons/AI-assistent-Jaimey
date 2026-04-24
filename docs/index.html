@@ -669,7 +669,7 @@ Hoe jij praat:
   function startVoiceInput() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
-      alert('Spraakherkenning werkt niet in deze browser. Probeer Chrome of Edge.');
+      alert('Spraakherkenning werkt niet in deze browser. Probeer Chrome of Safari.');
       return;
     }
 
@@ -682,13 +682,7 @@ Hoe jij praat:
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
-    micBtn.classList.add('listening');
-    micBtn.disabled = true;
-    inputBox.disabled = true;
-    sendBtn.disabled = true;
-
-    recognition.start();
-
+    // Handlers instellen VOOR start() — Safari vereist dit
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       inputBox.value = transcript;
@@ -701,15 +695,27 @@ Hoe jij praat:
       micBtn.disabled = false;
       inputBox.disabled = false;
       sendBtn.disabled = !inputBox.value.trim();
-      inputBox.focus();
     };
 
-    recognition.onerror = () => {
+    recognition.onerror = (event) => {
       micBtn.classList.remove('listening');
       micBtn.disabled = false;
       inputBox.disabled = false;
       sendBtn.disabled = !inputBox.value.trim();
+
+      if (event.error === 'not-allowed') {
+        alert('Microfoon toegang geweigerd. Ga naar Instellingen → Safari → Microfoon en sta toegang toe.');
+      } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        alert('Spraakherkenning mislukt (' + event.error + '). Probeer opnieuw.');
+      }
     };
+
+    // Nu pas starten
+    micBtn.classList.add('listening');
+    micBtn.disabled = true;
+    inputBox.disabled = true;
+    sendBtn.disabled = true;
+    recognition.start();
   }
 
   // ── Send Message ───────────────────────────────────
