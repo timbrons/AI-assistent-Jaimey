@@ -187,9 +187,6 @@ export default function ChatInterface() {
           ✈️
         </button>
       </div>
-      <p className="text-center text-xs text-gray-400 mt-1.5 select-none">
-        Druk op Enter om te versturen &bull; Shift+Enter voor een nieuwe regel
-      </p>
     </div>
   );
 
