@@ -184,7 +184,7 @@ export default function ChatInterface() {
           aria-label="Verstuur vraag"
           title="Verstuur (Enter)"
         >
-          🌍
+          ✈️
         </button>
       </div>
       <p className="text-center text-xs text-gray-400 mt-1.5 select-none">
