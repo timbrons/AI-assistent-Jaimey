@@ -202,7 +202,7 @@ export default function ChatInterface() {
                 Hoi! Ik ben jAImey 👋
               </h1>
               <p className="text-teal-100 text-xs font-semibold">
-                Jouw slimme wereld-assistent 🌍
+                Vraag me alles wat je wilt weten! 🌍
               </p>
             </div>
           </div>
