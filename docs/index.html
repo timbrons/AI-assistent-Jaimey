@@ -608,8 +608,11 @@ Hoe jij praat:
       document.getElementById('greeting-text').textContent = getGreeting() + ' Jaimey! 👋';
       const grid = document.getElementById('questions-grid');
       grid.innerHTML = SUGGESTED_QUESTIONS
-        .map(q => `<button class="q-btn" onclick="sendMessage(${JSON.stringify(q)})">${escapeHtml(q)}</button>`)
+        .map((q, i) => `<button class="q-btn" data-index="${i}">${escapeHtml(q)}</button>`)
         .join('');
+      grid.querySelectorAll('.q-btn').forEach((btn, i) => {
+        btn.addEventListener('click', () => sendMessage(SUGGESTED_QUESTIONS[i]));
+      });
     }
   }
 
