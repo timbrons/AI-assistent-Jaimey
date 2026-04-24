@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jaimey's Slimme Assistent 🚀</title>
+  <title>Jaimey's Slimme Assistent 🌍</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
     }
 
     body {
-      background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 50%, #fdf2f8 100%);
+      background: linear-gradient(135deg, #ecfeff 0%, #f0fdfa 50%, #ecfdf5 100%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -33,7 +33,7 @@
       background: white;
       border-radius: 24px;
       padding: 2.5rem 2rem;
-      box-shadow: 0 10px 40px rgba(139, 92, 246, 0.15);
+      box-shadow: 0 10px 40px rgba(13, 148, 136, 0.15);
       text-align: center;
     }
 
@@ -47,7 +47,7 @@
     .key-card h1 {
       font-size: 1.5rem;
       font-weight: 900;
-      color: #6d28d9;
+      color: #0f766e;
       margin-bottom: 0.5rem;
     }
 
@@ -71,12 +71,12 @@
       margin-bottom: 1rem;
     }
 
-    .key-input:focus { border-color: #7c3aed; }
+    .key-input:focus { border-color: #0d9488; }
 
     .key-btn {
       width: 100%;
       padding: 0.75rem 1rem;
-      background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+      background: linear-gradient(135deg, #0369a1, #0d9488, #059669);
       color: white;
       border: none;
       border-radius: 12px;
@@ -115,9 +115,9 @@
 
     /* Header */
     .header {
-      background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+      background: linear-gradient(90deg, #1d4ed8, #0d9488, #059669);
       padding: 12px 16px;
-      box-shadow: 0 2px 12px rgba(99, 102, 241, 0.3);
+      box-shadow: 0 2px 12px rgba(13, 148, 136, 0.35);
       flex-shrink: 0;
     }
 
@@ -135,7 +135,7 @@
 
     .header-rocket { font-size: 1.75rem; user-select: none; }
     .header-title { font-size: 1.2rem; font-weight: 900; color: white; line-height: 1.2; }
-    .header-sub { color: #e9d5ff; font-size: 0.75rem; font-weight: 600; }
+    .header-sub { color: #ccfbf1; font-size: 0.75rem; font-weight: 600; }
 
     .new-chat-btn {
       background: rgba(255,255,255,0.2);
@@ -162,7 +162,7 @@
 
     .messages-area::-webkit-scrollbar { width: 4px; }
     .messages-area::-webkit-scrollbar-track { background: transparent; }
-    .messages-area::-webkit-scrollbar-thumb { background: #d8b4fe; border-radius: 2px; }
+    .messages-area::-webkit-scrollbar-thumb { background: #5eead4; border-radius: 2px; }
 
     .messages-list {
       padding: 16px;
@@ -193,8 +193,8 @@
       user-select: none;
     }
 
-    .avatar.user { background: linear-gradient(135deg, #60a5fa, #4f46e5); color: white; }
-    .avatar.bot { background: linear-gradient(135deg, #c084fc, #f472b6); font-size: 1rem; }
+    .avatar.user { background: linear-gradient(135deg, #3b82f6, #0d9488); color: white; }
+    .avatar.bot { background: linear-gradient(135deg, #2dd4bf, #3b82f6); font-size: 1rem; }
 
     .bubble {
       max-width: 78%;
@@ -207,27 +207,27 @@
     }
 
     .bubble.user {
-      background: linear-gradient(135deg, #3b82f6, #4f46e5);
+      background: linear-gradient(135deg, #3b82f6, #0d9488);
       color: white;
       border-bottom-right-radius: 4px;
-      box-shadow: 0 2px 8px rgba(79,70,229,0.25);
+      box-shadow: 0 2px 8px rgba(13,148,136,0.25);
     }
 
     .bubble.bot {
       background: white;
       color: #1f2937;
-      border: 2px solid #ede9fe;
+      border: 2px solid #ccfbf1;
       border-bottom-left-radius: 4px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     }
 
-    .bubble.bot.streaming { border-color: #c4b5fd; }
+    .bubble.bot.streaming { border-color: #5eead4; }
 
     .cursor {
       display: inline-block;
       width: 2px;
       height: 1.1em;
-      background: #a78bfa;
+      background: #2dd4bf;
       margin-left: 2px;
       vertical-align: middle;
       animation: blink 0.8s infinite;
@@ -238,7 +238,7 @@
 
     .typing-bubble {
       background: white;
-      border: 2px solid #ede9fe;
+      border: 2px solid #ccfbf1;
       border-radius: 18px;
       border-bottom-left-radius: 4px;
       padding: 10px 16px;
@@ -250,7 +250,7 @@
     .dot {
       width: 8px;
       height: 8px;
-      background: #a78bfa;
+      background: #2dd4bf;
       border-radius: 50%;
       animation: bounceDot 1.2s infinite;
     }
@@ -266,11 +266,11 @@
       align-items: center;
       padding: 28px 16px 20px;
       text-align: center;
-      background: linear-gradient(180deg, #eff6ff, #f5f3ff);
+      background: linear-gradient(180deg, #ecfeff, #f0fdfa);
     }
 
     .welcome-emoji { font-size: 4rem; margin-bottom: 12px; animation: bounce 2s infinite; display: block; }
-    #greeting-area h2 { font-size: 1.5rem; font-weight: 900; color: #6d28d9; margin-bottom: 6px; }
+    #greeting-area h2 { font-size: 1.5rem; font-weight: 900; color: #0f766e; margin-bottom: 6px; }
     .greeting-sub { font-size: 0.9rem; font-weight: 600; color: #6b7280; }
 
     /* Questions area (onder invoerveld, alleen als leeg) */
@@ -279,7 +279,7 @@
       overflow-y: auto;
       scrollbar-width: thin;
       scrollbar-color: #d8b4fe transparent;
-      background: linear-gradient(180deg, #f5f3ff, #fdf2f8);
+      background: linear-gradient(180deg, #f0fdfa, #ecfdf5);
       padding: 16px;
       display: flex;
       flex-direction: column;
@@ -287,7 +287,7 @@
     }
 
     #questions-area::-webkit-scrollbar { width: 4px; }
-    #questions-area::-webkit-scrollbar-thumb { background: #d8b4fe; border-radius: 2px; }
+    #questions-area::-webkit-scrollbar-thumb { background: #5eead4; border-radius: 2px; }
 
     .questions-grid {
       display: grid;
@@ -314,7 +314,7 @@
       box-shadow: 0 1px 4px rgba(0,0,0,0.05);
     }
 
-    .q-btn:hover { background: #f5f3ff; border-color: #a78bfa; transform: scale(1.03); }
+    .q-btn:hover { background: #f0fdfa; border-color: #2dd4bf; transform: scale(1.03); }
     .q-btn:active { transform: scale(0.97); }
 
     .welcome-tip { margin-top: 16px; font-size: 0.75rem; color: #9ca3af; }
@@ -322,9 +322,9 @@
     /* Input area */
     .input-area {
       background: white;
-      border-top: 2px solid #ede9fe;
+      border-top: 2px solid #ccfbf1;
       padding: 12px 16px;
-      box-shadow: 0 -2px 12px rgba(139,92,246,0.06);
+      box-shadow: 0 -2px 12px rgba(13,148,136,0.08);
       flex-shrink: 0;
     }
 
@@ -333,7 +333,7 @@
     .input-box {
       flex: 1;
       resize: none;
-      border: 2px solid #ddd6fe;
+      border: 2px solid #99f6e4;
       border-radius: 18px;
       padding: 12px 16px;
       font-family: 'Nunito', sans-serif;
@@ -347,20 +347,20 @@
       overflow-y: auto;
     }
 
-    .input-box:focus { border-color: #7c3aed; }
+    .input-box:focus { border-color: #0d9488; }
     .input-box:disabled { opacity: 0.6; }
 
     .send-btn {
       width: 48px;
       height: 48px;
       flex-shrink: 0;
-      background: linear-gradient(135deg, #fb923c, #ec4899);
+      background: linear-gradient(135deg, #0d9488, #1d4ed8);
       border: none;
       border-radius: 14px;
       font-size: 1.25rem;
       cursor: pointer;
       transition: transform 0.1s, opacity 0.2s;
-      box-shadow: 0 2px 8px rgba(251,146,60,0.3);
+      box-shadow: 0 2px 8px rgba(13,148,136,0.35);
     }
 
     .send-btn:hover:not(:disabled) { transform: scale(1.05); }
@@ -391,7 +391,7 @@
 <!-- ══════════════ API KEY SCREEN ══════════════════ -->
 <div id="key-screen">
   <div class="key-card">
-    <span class="emoji">🚀</span>
+    <span class="emoji">🌍</span>
     <h1>Jaimey's Slimme Assistent</h1>
     <p>Voer je Anthropic API-sleutel in om te beginnen.<br>De sleutel wordt veilig opgeslagen in je browser.</p>
     <input
@@ -414,10 +414,10 @@
   <header class="header">
     <div class="header-inner">
       <div class="header-left">
-        <span class="header-rocket" aria-hidden="true">🚀</span>
+        <span class="header-rocket" aria-hidden="true">🌍</span>
         <div>
           <div class="header-title">Jaimey's Slimme Assistent</div>
-          <div class="header-sub">Stel me al je vragen! ✨</div>
+          <div class="header-sub">Ontdek de wereld! 🗺️</div>
         </div>
       </div>
       <button class="new-chat-btn" id="new-chat-btn" onclick="newChat()" style="display:none">
@@ -428,7 +428,7 @@
 
   <!-- Begroeting (alleen zichtbaar als leeg) -->
   <div id="greeting-area" style="display:none">
-    <span class="welcome-emoji">🌟</span>
+    <span class="welcome-emoji">🌍</span>
     <h2 id="greeting-text"></h2>
     <p class="greeting-sub">Typ hieronder je vraag of kies één van de onderstaande vragen</p>
   </div>
@@ -442,11 +442,11 @@
       <textarea
         id="input-box"
         class="input-box"
-        placeholder="Typ hier je vraag... 💬"
+        placeholder="Typ hier je vraag... 🌍"
         rows="1"
         aria-label="Stel een vraag"
       ></textarea>
-      <button class="send-btn" id="send-btn" disabled title="Verstuur (Enter)">🚀</button>
+      <button class="send-btn" id="send-btn" disabled title="Verstuur (Enter)">🌍</button>
     </div>
     <p class="input-hint">Druk op Enter om te versturen &bull; Shift+Enter voor een nieuwe regel</p>
   </div>
@@ -454,7 +454,7 @@
   <!-- Voorgestelde vragen (alleen zichtbaar als leeg) -->
   <div id="questions-area" style="display:none">
     <div class="questions-grid" id="questions-grid"></div>
-    <p class="welcome-tip">💡 Tip: je kunt ook je eigen vraag typen!</p>
+    <p class="welcome-tip">🗺️ Tip: je kunt ook je eigen vraag typen!</p>
   </div>
 </div>
 
@@ -602,7 +602,7 @@ Hoe jij praat:
       const isUser = msg.role === 'user';
       html += `
         <div class="msg-row ${isUser ? 'user' : 'bot'}">
-          <div class="avatar ${isUser ? 'user' : 'bot'}" aria-hidden="true">${isUser ? 'J' : '🤖'}</div>
+          <div class="avatar ${isUser ? 'user' : 'bot'}" aria-hidden="true">${isUser ? 'J' : '🌍'}</div>
           <div class="bubble ${isUser ? 'user' : 'bot'}">${escapeHtml(msg.content)}</div>
         </div>`;
     }
@@ -610,7 +610,7 @@ Hoe jij praat:
     if (streamingText) {
       html += `
         <div class="msg-row bot">
-          <div class="avatar bot" aria-hidden="true">🤖</div>
+          <div class="avatar bot" aria-hidden="true">🌍</div>
           <div class="bubble bot streaming">${escapeHtml(streamingText)}<span class="cursor" aria-hidden="true"></span></div>
         </div>`;
     }
@@ -618,7 +618,7 @@ Hoe jij praat:
     if (isLoading && !streamingText) {
       html += `
         <div class="typing-row">
-          <div class="avatar bot">🤖</div>
+          <div class="avatar bot">🌍</div>
           <div class="typing-bubble">
             <div class="dots">
               <div class="dot"></div><div class="dot"></div><div class="dot"></div>

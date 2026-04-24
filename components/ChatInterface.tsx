@@ -121,27 +121,27 @@ export default function ChatInterface() {
   const isEmpty = messages.length === 0 && !isLoading && !streamingText;
 
   const inputBar = (
-    <div className="bg-white border-t-2 border-purple-100 px-4 py-3 shadow-lg flex-shrink-0">
+    <div className="bg-white border-t-2 border-teal-100 px-4 py-3 shadow-lg flex-shrink-0">
       <div className="flex gap-2 items-end">
         <textarea
           ref={textareaRef}
           value={input}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          placeholder="Typ hier je vraag... 💬"
+          placeholder="Typ hier je vraag... 🌍"
           disabled={isLoading}
           rows={1}
-          className="flex-1 resize-none rounded-2xl border-2 border-purple-200 focus:border-purple-500 focus:outline-none px-4 py-3 text-base leading-snug transition-colors disabled:opacity-60 min-h-[48px] max-h-32 overflow-y-auto"
+          className="flex-1 resize-none rounded-2xl border-2 border-teal-200 focus:border-teal-500 focus:outline-none px-4 py-3 text-base leading-snug transition-colors disabled:opacity-60 min-h-[48px] max-h-32 overflow-y-auto"
           aria-label="Stel een vraag"
         />
         <button
           onClick={() => sendMessage(input)}
           disabled={isLoading || !input.trim()}
-          className="h-12 w-12 flex-shrink-0 bg-gradient-to-br from-orange-400 to-pink-500 text-white rounded-2xl flex items-center justify-center text-xl font-bold shadow hover:scale-105 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
+          className="h-12 w-12 flex-shrink-0 bg-gradient-to-br from-teal-500 to-blue-600 text-white rounded-2xl flex items-center justify-center text-xl font-bold shadow hover:scale-105 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
           aria-label="Verstuur vraag"
           title="Verstuur (Enter)"
         >
-          🚀
+          🌍
         </button>
       </div>
       <p className="text-center text-xs text-gray-400 mt-1.5 select-none">
@@ -153,16 +153,16 @@ export default function ChatInterface() {
   return (
     <div className="flex flex-col h-screen max-w-3xl mx-auto">
       {/* ── Header ── */}
-      <header className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-4 py-3 shadow-lg flex-shrink-0">
+      <header className="bg-gradient-to-r from-blue-700 via-teal-600 to-emerald-500 px-4 py-3 shadow-lg flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-3xl select-none" aria-hidden="true">🚀</span>
+            <span className="text-3xl select-none" aria-hidden="true">🌍</span>
             <div>
               <h1 className="text-xl font-extrabold text-white tracking-tight leading-tight">
                 Jaimey&rsquo;s Slimme Assistent
               </h1>
-              <p className="text-purple-200 text-xs font-semibold">
-                Stel me al je vragen! ✨
+              <p className="text-teal-100 text-xs font-semibold">
+                Ontdek de wereld! 🗺️
               </p>
             </div>
           </div>
@@ -183,11 +183,11 @@ export default function ChatInterface() {
       {isEmpty ? (
         <>
           {/* ── Greeting ── */}
-          <div className="flex-shrink-0 flex flex-col items-center py-7 px-4 text-center bg-gradient-to-b from-blue-50 to-purple-50">
+          <div className="flex-shrink-0 flex flex-col items-center py-7 px-4 text-center bg-gradient-to-b from-sky-50 to-teal-50">
             <span className="text-5xl mb-3 select-none" style={{ animation: 'bounce 2s infinite' }}>
-              🌟
+              🌍
             </span>
-            <h2 className="text-2xl font-extrabold text-purple-700 mb-1">
+            <h2 className="text-2xl font-extrabold text-teal-700 mb-1">
               {getGreeting()} Jaimey! 👋
             </h2>
             <p className="text-gray-500 text-sm font-medium">
@@ -199,20 +199,20 @@ export default function ChatInterface() {
           {inputBar}
 
           {/* ── Suggested questions ── */}
-          <div className="flex-1 overflow-y-auto scrollbar-thin bg-gradient-to-b from-purple-50 to-pink-50 px-4 py-5">
+          <div className="flex-1 overflow-y-auto scrollbar-thin bg-gradient-to-b from-teal-50 to-emerald-50 px-4 py-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto">
               {SUGGESTED_QUESTIONS.map((question, i) => (
                 <button
                   key={i}
                   onClick={() => sendMessage(question)}
-                  className="bg-white hover:bg-purple-50 border-2 border-purple-100 hover:border-purple-400 text-left px-4 py-3 rounded-2xl text-sm font-semibold text-gray-700 transition-all duration-150 hover:scale-[1.03] active:scale-[0.97] shadow-sm cursor-pointer"
+                  className="bg-white hover:bg-teal-50 border-2 border-teal-100 hover:border-teal-400 text-left px-4 py-3 rounded-2xl text-sm font-semibold text-gray-700 transition-all duration-150 hover:scale-[1.03] active:scale-[0.97] shadow-sm cursor-pointer"
                 >
                   {question}
                 </button>
               ))}
             </div>
-            <p className="mt-5 text-xs text-gray-400 text-center select-none">
-              💡 Tip: je kunt ook je eigen vraag typen!
+            <p className="mt-5 text-xs text-gray-500 text-center select-none">
+              🗺️ Tip: je kunt ook je eigen vraag typen!
             </p>
           </div>
         </>
@@ -234,15 +234,15 @@ export default function ChatInterface() {
 
               {isLoading && !streamingText && (
                 <div className="flex items-end gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center flex-shrink-0 text-base select-none">
-                    🤖
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center flex-shrink-0 text-base select-none">
+                    🌍
                   </div>
-                  <div className="bg-white border-2 border-purple-100 rounded-2xl rounded-bl-none px-4 py-3 shadow-sm">
+                  <div className="bg-white border-2 border-teal-100 rounded-2xl rounded-bl-none px-4 py-3 shadow-sm">
                     <div className="flex gap-1.5 items-center h-5">
                       {[0, 1, 2].map((i) => (
                         <span
                           key={i}
-                          className="inline-block w-2 h-2 bg-purple-400 rounded-full animate-bounce"
+                          className="inline-block w-2 h-2 bg-teal-400 rounded-full animate-bounce"
                           style={{ animationDelay: `${i * 0.18}s` }}
                         />
                       ))}

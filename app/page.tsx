@@ -2,7 +2,7 @@ import ChatInterface from '@/components/ChatInterface';
 
 export default function Home() {
   return (
-    <main className="h-full bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+    <main className="h-full bg-gradient-to-br from-sky-50 via-teal-50 to-emerald-50">
       <ChatInterface />
     </main>
   );
