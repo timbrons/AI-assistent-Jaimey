@@ -552,6 +552,7 @@ Hoe jij praat:
   let isLoading = false;
   let apiKey = '';
   let voiceEnabled = localStorage.getItem('voice_enabled') === 'true';
+  let openaiKey = localStorage.getItem('openai_api_key') || '';
 
   // ── Voice Toggle & TTS ────────────────────────────
   function updateVoiceBtn() {
@@ -563,10 +564,25 @@ Hoe jij praat:
   }
 
   function toggleVoice() {
-    voiceEnabled = !voiceEnabled;
+    const turningOn = !voiceEnabled;
+
+    if (turningOn && !openaiKey) {
+      const key = prompt(
+        'Plak je OpenAI-sleutel voor een natuurlijke stem (sk-...).\n\n' +
+        'Laat leeg om de standaard browserstem te gebruiken.'
+      );
+      if (key && key.trim().startsWith('sk-')) {
+        openaiKey = key.trim();
+        localStorage.setItem('openai_api_key', openaiKey);
+      }
+    }
+
+    voiceEnabled = turningOn;
     localStorage.setItem('voice_enabled', voiceEnabled);
     updateVoiceBtn();
-    if (!voiceEnabled && window.speechSynthesis) window.speechSynthesis.cancel();
+
+    if (voiceEnabled) primeAudio();
+    else stopSpeaking();
   }
 
   function textForSpeech(text) {
@@ -593,10 +609,8 @@ Hoe jij praat:
     return nl.find(isHQ) || nl.find(v => /xander/i.test(v.name)) || nl[0] || null;
   }
 
-  function speakText(text) {
-    if (!voiceEnabled || !window.speechSynthesis) return;
-    const clean = textForSpeech(text);
-    if (!clean) return;
+  function speakWithBrowser(clean) {
+    if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(clean);
     utterance.rate = 0.95;
@@ -606,21 +620,86 @@ Hoe jij praat:
     window.speechSynthesis.speak(utterance);
   }
 
-  // Diagnose: lang indrukken op de spraakknop toont welke stemmen deze browser aanbiedt
+  // iOS speelt alleen audio af via een element dat tijdens een tik is vrijgegeven,
+  // dus hergebruiken we steeds ditzelfde element.
+  const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+  let ttsAudio = null;
+  let ttsObjectUrl = null;
+
+  function primeAudio() {
+    if (!ttsAudio) ttsAudio = new Audio();
+    ttsAudio.src = SILENT_WAV;
+    ttsAudio.play().catch(() => {});
+  }
+
+  function stopSpeaking() {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (ttsAudio) { ttsAudio.pause(); ttsAudio.currentTime = 0; }
+  }
+
+  async function speakWithOpenAI(clean) {
+    const res = await fetch('https://api.openai.com/v1/audio/speech', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + openaiKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini-tts',
+        voice: 'nova',
+        input: clean,
+        instructions: 'Spreek vrolijk, warm en enthousiast Nederlands, alsof je iets leuks uitlegt aan een kind van 8 jaar. Praat rustig en duidelijk.',
+        response_format: 'mp3',
+      }),
+    });
+
+    if (!res.ok) {
+      const detail = await res.text().catch(() => '');
+      throw new Error('HTTP ' + res.status + ' ' + detail.slice(0, 200));
+    }
+
+    const blob = await res.blob();
+    if (ttsObjectUrl) URL.revokeObjectURL(ttsObjectUrl);
+    ttsObjectUrl = URL.createObjectURL(blob);
+
+    if (!ttsAudio) ttsAudio = new Audio();
+    ttsAudio.src = ttsObjectUrl;
+    await ttsAudio.play();
+  }
+
+  async function speakText(text) {
+    if (!voiceEnabled) return;
+    const clean = textForSpeech(text);
+    if (!clean) return;
+
+    stopSpeaking();
+
+    if (openaiKey) {
+      try {
+        await speakWithOpenAI(clean);
+        return;
+      } catch (err) {
+        console.error('OpenAI TTS mislukt, terugval op browserstem:', err);
+      }
+    }
+    speakWithBrowser(clean);
+  }
+
+  // Lang indrukken op de spraakknop: toon welke stem actief is en beheer de sleutel
   function showVoiceList() {
-    const all = cachedVoices.length ? cachedVoices : (window.speechSynthesis?.getVoices() || []);
-    if (!all.length) {
-      alert('Deze browser geeft (nog) geen stemmen door aan de app.');
+    if (openaiKey) {
+      if (confirm('Stem: OpenAI (natuurlijk).\n\nWil je de OpenAI-sleutel wissen en terug naar de browserstem?')) {
+        openaiKey = '';
+        localStorage.removeItem('openai_api_key');
+        alert('Sleutel gewist. jAImey gebruikt nu de browserstem.');
+      }
       return;
     }
-    const nl = dutchVoices();
-    const chosen = bestDutchVoice();
-    const list = (nl.length ? nl : all)
-      .map(v => `• ${v.name} [${v.lang}]\n  ${v.voiceURI || '?'}`)
-      .join('\n');
+
+    const browserVoice = bestDutchVoice();
     alert(
-      `Nederlandse stemmen: ${nl.length} (van ${all.length} totaal)\n\n${list}` +
-      `\n\nIn gebruik: ${chosen ? chosen.name : 'geen'}`
+      'Stem: browser (' + (browserVoice ? browserVoice.name : 'geen gevonden') + ').\n\n' +
+      'Zet spraak uit en weer aan om een OpenAI-sleutel in te voeren voor een natuurlijkere stem.'
     );
   }
 
@@ -841,12 +920,15 @@ Hoe jij praat:
     const trimmed = content.trim();
     if (!trimmed || isLoading) return;
 
-    // Stop any current speech and prime TTS within user-gesture context (required for iOS Safari)
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
-    if (voiceEnabled && window.speechSynthesis) {
-      const primer = new SpeechSynthesisUtterance(' ');
-      primer.volume = 0;
-      window.speechSynthesis.speak(primer);
+    // Stop lopende spraak en geef audio vrij binnen de tik (vereist door iOS Safari)
+    stopSpeaking();
+    if (voiceEnabled) {
+      primeAudio();
+      if (!openaiKey && window.speechSynthesis) {
+        const primer = new SpeechSynthesisUtterance(' ');
+        primer.volume = 0;
+        window.speechSynthesis.speak(primer);
+      }
     }
 
     messages.push({ role: 'user', content: trimmed });
