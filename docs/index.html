@@ -573,6 +573,24 @@ Hoe jij praat:
     return text.replace(/\p{Emoji_Presentation}/gu, '').replace(/\s+/g, ' ').trim();
   }
 
+  // Cache voices list — voiceschanged fires when (enhanced) voices become available
+  let cachedVoices = [];
+  if (window.speechSynthesis) {
+    const refreshVoices = () => { cachedVoices = window.speechSynthesis.getVoices(); };
+    window.speechSynthesis.addEventListener('voiceschanged', refreshVoices);
+    refreshVoices();
+  }
+
+  function bestDutchVoice() {
+    const voices = cachedVoices.length ? cachedVoices : (window.speechSynthesis?.getVoices() || []);
+    const nl = voices.filter(v => v.lang === 'nl-NL' || v.lang.startsWith('nl'));
+    // Prefer enhanced / premium / neural voices
+    return nl.find(v => /enhanced|premium|neural/i.test(v.name))
+        || nl.find(v => /xander/i.test(v.name))
+        || nl[0]
+        || null;
+  }
+
   function speakText(text) {
     if (!voiceEnabled || !window.speechSynthesis) return;
     const clean = textForSpeech(text);
@@ -581,9 +599,8 @@ Hoe jij praat:
     const utterance = new SpeechSynthesisUtterance(clean);
     utterance.lang = 'nl-NL';
     utterance.rate = 0.95;
-    const voices = window.speechSynthesis.getVoices();
-    const nlVoice = voices.find(v => v.lang === 'nl-NL') || voices.find(v => v.lang.startsWith('nl'));
-    if (nlVoice) utterance.voice = nlVoice;
+    const voice = bestDutchVoice();
+    if (voice) utterance.voice = voice;
     window.speechSynthesis.speak(utterance);
   }
 

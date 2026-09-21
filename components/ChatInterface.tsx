@@ -59,7 +59,10 @@ export default function ChatInterface() {
     utterance.lang = 'nl-NL';
     utterance.rate = 0.95;
     const voices = window.speechSynthesis.getVoices();
-    const nlVoice = voices.find(v => v.lang === 'nl-NL') || voices.find(v => v.lang.startsWith('nl'));
+    const nl = voices.filter(v => v.lang === 'nl-NL' || v.lang.startsWith('nl'));
+    const nlVoice = nl.find(v => /enhanced|premium|neural/i.test(v.name))
+                 || nl.find(v => /xander/i.test(v.name))
+                 || nl[0];
     if (nlVoice) utterance.voice = nlVoice;
     window.speechSynthesis.speak(utterance);
   }, []);
