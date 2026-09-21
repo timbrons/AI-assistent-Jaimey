@@ -609,15 +609,21 @@ Hoe jij praat:
     return nl.find(isHQ) || nl.find(v => /xander/i.test(v.name)) || nl[0] || null;
   }
 
+  // Lost op zodra het praten begint, zodat de tekst gelijk met het geluid verschijnt
   function speakWithBrowser(clean) {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(clean);
-    utterance.rate = 0.95;
-    const voice = bestDutchVoice();
-    if (voice) utterance.voice = voice;
-    utterance.lang = voice?.lang || 'nl-NL';
-    window.speechSynthesis.speak(utterance);
+    return new Promise((resolve) => {
+      if (!window.speechSynthesis) return resolve();
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(clean);
+      utterance.rate = 0.95;
+      const voice = bestDutchVoice();
+      if (voice) utterance.voice = voice;
+      utterance.lang = voice?.lang || 'nl-NL';
+      utterance.onstart = resolve;
+      utterance.onerror = resolve;
+      window.speechSynthesis.speak(utterance);
+      setTimeout(resolve, 1500); // veiligheidsklep als onstart uitblijft
+    });
   }
 
   // iOS speelt alleen audio af via een element dat tijdens een tik is vrijgegeven,
@@ -682,7 +688,7 @@ Hoe jij praat:
         console.error('OpenAI TTS mislukt, terugval op browserstem:', err);
       }
     }
-    speakWithBrowser(clean);
+    return speakWithBrowser(clean);
   }
 
   // Lang indrukken op de spraakknop: toon welke stem actief is en beheer de sleutel
@@ -944,6 +950,9 @@ Hoe jij praat:
 
     renderMessages();
 
+    // Met spraak aan blijven de typ-bolletjes staan tot het geluid begint,
+    // zodat Jaimey het antwoord eerst hoort en dan pas leest
+    const holdText = voiceEnabled;
     let streamingText = '';
 
     try {
@@ -996,14 +1005,15 @@ Hoe jij praat:
             const event = JSON.parse(data);
             if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
               streamingText += event.delta.text;
-              renderMessages(streamingText);
+              if (!holdText) renderMessages(streamingText);
             }
           } catch (_) {}
         }
       }
 
+      if (holdText) await speakText(streamingText);
       messages.push({ role: 'assistant', content: streamingText });
-      speakText(streamingText);
+      if (!holdText) speakText(streamingText);
 
     } catch (err) {
       console.error('Fout:', err);
