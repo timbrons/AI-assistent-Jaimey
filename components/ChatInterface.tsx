@@ -56,14 +56,15 @@ export default function ChatInterface() {
     if (!clean) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(clean);
-    utterance.lang = 'nl-NL';
     utterance.rate = 0.95;
     const voices = window.speechSynthesis.getVoices();
-    const nl = voices.filter(v => v.lang === 'nl-NL' || v.lang.startsWith('nl'));
-    const nlVoice = nl.find(v => /enhanced|premium|neural/i.test(v.name))
-                 || nl.find(v => /xander/i.test(v.name))
-                 || nl[0];
+    const nl = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('nl'));
+    // iOS names both variants "Xander" — the quality marker lives in voiceURI
+    const isHQ = (v: SpeechSynthesisVoice) =>
+      /enhanced|premium|neural|siri/i.test(`${v.name} ${v.voiceURI || ''}`);
+    const nlVoice = nl.find(isHQ) || nl.find(v => /xander/i.test(v.name)) || nl[0];
     if (nlVoice) utterance.voice = nlVoice;
+    utterance.lang = nlVoice?.lang || 'nl-NL';
     window.speechSynthesis.speak(utterance);
   }, []);
 

@@ -469,7 +469,7 @@
         </div>
       </div>
       <div style="display:flex; gap:8px; align-items:center">
-        <button class="voice-btn" id="voice-btn" onclick="toggleVoice()" title="Spraak inschakelen" aria-label="Spraak aan/uit">🔇</button>
+        <button class="voice-btn" id="voice-btn" title="Spraak inschakelen" aria-label="Spraak aan/uit">🔇</button>
         <button class="new-chat-btn" id="new-chat-btn" onclick="newChat()" style="display:none">
           Nieuw gesprek
         </button>
@@ -581,14 +581,16 @@ Hoe jij praat:
     refreshVoices();
   }
 
-  function bestDutchVoice() {
+  function dutchVoices() {
     const voices = cachedVoices.length ? cachedVoices : (window.speechSynthesis?.getVoices() || []);
-    const nl = voices.filter(v => v.lang === 'nl-NL' || v.lang.startsWith('nl'));
-    // Prefer enhanced / premium / neural voices
-    return nl.find(v => /enhanced|premium|neural/i.test(v.name))
-        || nl.find(v => /xander/i.test(v.name))
-        || nl[0]
-        || null;
+    return voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('nl'));
+  }
+
+  function bestDutchVoice() {
+    const nl = dutchVoices();
+    // iOS names both variants "Xander" — the quality marker lives in voiceURI
+    const isHQ = v => /enhanced|premium|neural|siri/i.test((v.name || '') + ' ' + (v.voiceURI || ''));
+    return nl.find(isHQ) || nl.find(v => /xander/i.test(v.name)) || nl[0] || null;
   }
 
   function speakText(text) {
@@ -597,11 +599,29 @@ Hoe jij praat:
     if (!clean) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(clean);
-    utterance.lang = 'nl-NL';
     utterance.rate = 0.95;
     const voice = bestDutchVoice();
     if (voice) utterance.voice = voice;
+    utterance.lang = voice?.lang || 'nl-NL';
     window.speechSynthesis.speak(utterance);
+  }
+
+  // Diagnose: lang indrukken op de spraakknop toont welke stemmen deze browser aanbiedt
+  function showVoiceList() {
+    const all = cachedVoices.length ? cachedVoices : (window.speechSynthesis?.getVoices() || []);
+    if (!all.length) {
+      alert('Deze browser geeft (nog) geen stemmen door aan de app.');
+      return;
+    }
+    const nl = dutchVoices();
+    const chosen = bestDutchVoice();
+    const list = (nl.length ? nl : all)
+      .map(v => `• ${v.name} [${v.lang}]\n  ${v.voiceURI || '?'}`)
+      .join('\n');
+    alert(
+      `Nederlandse stemmen: ${nl.length} (van ${all.length} totaal)\n\n${list}` +
+      `\n\nIn gebruik: ${chosen ? chosen.name : 'geen'}`
+    );
   }
 
   // ── Init ───────────────────────────────────────────
@@ -631,6 +651,27 @@ Hoe jij praat:
 
     document.getElementById('api-key-input').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') saveKey();
+    });
+
+    const voiceBtn = document.getElementById('voice-btn');
+    let pressTimer = null;
+    let longPressed = false;
+
+    const startPress = () => {
+      longPressed = false;
+      pressTimer = setTimeout(() => { longPressed = true; showVoiceList(); }, 600);
+    };
+    const cancelPress = () => clearTimeout(pressTimer);
+
+    voiceBtn.addEventListener('touchstart', startPress, { passive: true });
+    voiceBtn.addEventListener('touchend', cancelPress);
+    voiceBtn.addEventListener('touchmove', cancelPress);
+    voiceBtn.addEventListener('mousedown', startPress);
+    voiceBtn.addEventListener('mouseup', cancelPress);
+    voiceBtn.addEventListener('mouseleave', cancelPress);
+    voiceBtn.addEventListener('click', () => {
+      if (longPressed) { longPressed = false; return; }
+      toggleVoice();
     });
 
     updateVoiceBtn();
