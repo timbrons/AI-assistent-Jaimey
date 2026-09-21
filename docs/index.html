@@ -402,6 +402,21 @@
 
     .input-hint { text-align: center; font-size: 0.75rem; color: #9ca3af; margin-top: 6px; user-select: none; }
 
+    .voice-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      font-size: 1.1rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.15s;
+      line-height: 1;
+    }
+
+    .voice-btn:hover { background: rgba(255,255,255,0.3); }
+    .voice-btn.active { background: rgba(255,255,255,0.35); }
+
     /* ── Animations ───────────────────────────────── */
     @keyframes bounce {
       0%, 100% { transform: translateY(0); }
@@ -453,9 +468,12 @@
           <div class="header-sub">Vraag me alles wat je wilt weten! 🌍</div>
         </div>
       </div>
-      <button class="new-chat-btn" id="new-chat-btn" onclick="newChat()" style="display:none">
-        Nieuw gesprek
-      </button>
+      <div style="display:flex; gap:8px; align-items:center">
+        <button class="voice-btn" id="voice-btn" onclick="toggleVoice()" title="Spraak inschakelen" aria-label="Spraak aan/uit">🔇</button>
+        <button class="new-chat-btn" id="new-chat-btn" onclick="newChat()" style="display:none">
+          Nieuw gesprek
+        </button>
+      </div>
     </div>
   </header>
 
@@ -533,6 +551,41 @@ Hoe jij praat:
   let messages = [];
   let isLoading = false;
   let apiKey = '';
+  let voiceEnabled = localStorage.getItem('voice_enabled') === 'true';
+
+  // ── Voice Toggle & TTS ────────────────────────────
+  function updateVoiceBtn() {
+    const btn = document.getElementById('voice-btn');
+    if (!btn) return;
+    btn.textContent = voiceEnabled ? '🔊' : '🔇';
+    btn.title = voiceEnabled ? 'Spraak uitschakelen' : 'Spraak inschakelen';
+    voiceEnabled ? btn.classList.add('active') : btn.classList.remove('active');
+  }
+
+  function toggleVoice() {
+    voiceEnabled = !voiceEnabled;
+    localStorage.setItem('voice_enabled', voiceEnabled);
+    updateVoiceBtn();
+    if (!voiceEnabled && window.speechSynthesis) window.speechSynthesis.cancel();
+  }
+
+  function textForSpeech(text) {
+    return text.replace(/\p{Emoji_Presentation}/gu, '').replace(/\s+/g, ' ').trim();
+  }
+
+  function speakText(text) {
+    if (!voiceEnabled || !window.speechSynthesis) return;
+    const clean = textForSpeech(text);
+    if (!clean) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(clean);
+    utterance.lang = 'nl-NL';
+    utterance.rate = 0.95;
+    const voices = window.speechSynthesis.getVoices();
+    const nlVoice = voices.find(v => v.lang === 'nl-NL') || voices.find(v => v.lang.startsWith('nl'));
+    if (nlVoice) utterance.voice = nlVoice;
+    window.speechSynthesis.speak(utterance);
+  }
 
   // ── Init ───────────────────────────────────────────
   (function init() {
@@ -562,6 +615,10 @@ Hoe jij praat:
     document.getElementById('api-key-input').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') saveKey();
     });
+
+    updateVoiceBtn();
+    // Pre-load voices list
+    if (window.speechSynthesis) window.speechSynthesis.getVoices();
   })();
 
   function saveKey() {
@@ -726,6 +783,14 @@ Hoe jij praat:
     const trimmed = content.trim();
     if (!trimmed || isLoading) return;
 
+    // Stop any current speech and prime TTS within user-gesture context (required for iOS Safari)
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (voiceEnabled && window.speechSynthesis) {
+      const primer = new SpeechSynthesisUtterance(' ');
+      primer.volume = 0;
+      window.speechSynthesis.speak(primer);
+    }
+
     messages.push({ role: 'user', content: trimmed });
     isLoading = true;
 
@@ -798,6 +863,7 @@ Hoe jij praat:
       }
 
       messages.push({ role: 'assistant', content: streamingText });
+      speakText(streamingText);
 
     } catch (err) {
       console.error('Fout:', err);

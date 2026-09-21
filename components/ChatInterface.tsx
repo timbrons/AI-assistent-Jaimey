@@ -32,8 +32,37 @@ export default function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const [streamingText, setStreamingText] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState<boolean>(() => {
+    try { return localStorage.getItem('voice_enabled') === 'true'; } catch { return false; }
+  });
+  const voiceEnabledRef = useRef(voiceEnabled);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => { voiceEnabledRef.current = voiceEnabled; }, [voiceEnabled]);
+
+  const toggleVoice = useCallback(() => {
+    setVoiceEnabled(prev => {
+      const next = !prev;
+      try { localStorage.setItem('voice_enabled', String(next)); } catch {}
+      if (!next && typeof window !== 'undefined') window.speechSynthesis?.cancel();
+      return next;
+    });
+  }, []);
+
+  const speakText = useCallback((text: string) => {
+    if (!voiceEnabledRef.current || typeof window === 'undefined' || !window.speechSynthesis) return;
+    const clean = text.replace(/\p{Emoji_Presentation}/gu, '').replace(/\s+/g, ' ').trim();
+    if (!clean) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(clean);
+    utterance.lang = 'nl-NL';
+    utterance.rate = 0.95;
+    const voices = window.speechSynthesis.getVoices();
+    const nlVoice = voices.find(v => v.lang === 'nl-NL') || voices.find(v => v.lang.startsWith('nl'));
+    if (nlVoice) utterance.voice = nlVoice;
+    window.speechSynthesis.speak(utterance);
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -43,6 +72,16 @@ export default function ChatInterface() {
     async (content: string) => {
       const trimmed = content.trim();
       if (!trimmed || isLoading) return;
+
+      // Stop speech and prime TTS within user-gesture context (required for iOS Safari)
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        if (voiceEnabledRef.current) {
+          const primer = new SpeechSynthesisUtterance(' ');
+          primer.volume = 0;
+          window.speechSynthesis.speak(primer);
+        }
+      }
 
       const newUserMessage: Message = { role: 'user', content: trimmed };
       const nextMessages = [...messages, newUserMessage];
@@ -87,6 +126,7 @@ export default function ChatInterface() {
           ...prev,
           { role: 'assistant', content: fullText },
         ]);
+        speakText(fullText);
       } catch (err) {
         console.error('Fout bij versturen bericht:', err);
         setMessages((prev) => [
@@ -103,7 +143,7 @@ export default function ChatInterface() {
         textareaRef.current?.focus();
       }
     },
-    [messages, isLoading]
+    [messages, isLoading, speakText]
   );
 
   const startVoiceInput = useCallback(() => {
@@ -216,17 +256,29 @@ export default function ChatInterface() {
               </p>
             </div>
           </div>
-          {!isEmpty && (
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => {
-                setMessages([]);
-                setStreamingText('');
-              }}
-              className="bg-white/20 hover:bg-white/30 active:bg-white/40 text-white text-xs font-bold px-3 py-1.5 rounded-full transition-colors"
+              onClick={toggleVoice}
+              className={`text-lg px-2.5 py-1 rounded-full transition-colors ${
+                voiceEnabled ? 'bg-white/35 hover:bg-white/45' : 'bg-white/20 hover:bg-white/30'
+              }`}
+              title={voiceEnabled ? 'Spraak uitschakelen' : 'Spraak inschakelen'}
+              aria-label={voiceEnabled ? 'Spraak uitschakelen' : 'Spraak inschakelen'}
             >
-              Nieuw gesprek
+              {voiceEnabled ? '🔊' : '🔇'}
             </button>
-          )}
+            {!isEmpty && (
+              <button
+                onClick={() => {
+                  setMessages([]);
+                  setStreamingText('');
+                }}
+                className="bg-white/20 hover:bg-white/30 active:bg-white/40 text-white text-xs font-bold px-3 py-1.5 rounded-full transition-colors"
+              >
+                Nieuw gesprek
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
